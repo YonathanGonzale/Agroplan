@@ -11,8 +11,8 @@
   <form [formGroup]="aplicadorForm" (ngSubmit)="onSubmit()">
     <ion-list>
       <ion-item>
-        <ion-label position="stacked">Descripción *</ion-label>
-        <ion-input type="text" formControlName="descripcion" required></ion-input>
+        <ion-label position="stacked">Productor *</ion-label>
+        <ion-input type="text" formControlName="productor" required></ion-input>
       </ion-item>
       <ion-item>
         <ion-label position="stacked">Correo</ion-label>
@@ -25,6 +25,10 @@
       <ion-item>
         <ion-label position="stacked">Dirección</ion-label>
         <ion-input type="text" formControlName="direccion"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Aplicadores</ion-label>
+        <ion-input type="text" formControlName="aplicadores"></ion-input>
       </ion-item>
     </ion-list>
 

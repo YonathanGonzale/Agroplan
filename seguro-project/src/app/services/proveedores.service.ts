@@ -16,7 +16,7 @@ export class ProveedoresService {
       .set('page', page.toString())
       .set('limit', limit.toString());
     if (search) {
-      params = params.set('search', search);
+      params = params.set('busqueda', search);
     }
     return this.http.get(this.apiUrl, { params });
   }

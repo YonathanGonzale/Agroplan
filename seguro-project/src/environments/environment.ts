@@ -4,8 +4,13 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3001/api'
-};
+  apiUrl: 'http://localhost:3001/api',
+  defaultLanguage: 'es',
+  supportedLanguages: ['es'],
+  version: '0.0.1' // Versión hardcodeada temporalmente
+} as const;
+
+export type Environment = typeof environment;
 
 /*
  * For easier debugging in development mode, you can import the following file

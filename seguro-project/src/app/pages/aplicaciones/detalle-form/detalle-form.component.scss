@@ -1,0 +1,55 @@
+ion-content {
+  --padding: 16px;
+}
+
+form {
+  max-width: 600px;
+  margin: 0 auto;
+
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    --background: var(--ion-color-light);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.ion-invalid.ion-touched {
+      --border-color: var(--ion-color-danger);
+    }
+
+    &.item-has-focus {
+      --background: var(--ion-color-light-shade);
+    }
+  }
+
+  ion-label {
+    font-weight: 500;
+  }
+
+  .ion-padding {
+    padding-top: 24px;
+  }
+
+  ion-button {
+    --border-radius: 8px;
+    font-weight: 500;
+  }
+}
+
+ion-grid {
+  padding: 0;
+}
+
+ion-row {
+  margin-bottom: 16px;
+}
+
+.required-field {
+  color: var(--ion-color-danger);
+  font-size: 0.8em;
+  margin-top: 4px;
+}

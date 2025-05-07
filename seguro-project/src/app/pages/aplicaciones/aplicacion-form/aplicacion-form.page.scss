@@ -5,49 +5,97 @@ ion-content {
 form {
   max-width: 1200px;
   margin: 0 auto;
+}
 
-  ion-card {
-    margin: 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+ion-card {
+  margin: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
-    ion-card-header {
-      background: var(--ion-color-primary);
-      padding: 12px;
+  ion-card-header {
+    background: var(--ion-color-primary);
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-      ion-card-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: white;
-      }
-    }
-
-    ion-card-content {
-      padding: 16px;
-    }
-  }
-
-  ion-item {
-    --padding-start: 0;
-    --inner-padding-end: 0;
-    --background: transparent;
-    margin-bottom: 8px;
-
-    &::part(native) {
-      padding: 0;
+    ion-card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: white;
+      margin: 0;
     }
   }
 
-  ion-grid {
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --background: transparent;
+  margin-bottom: 8px;
+
+  &::part(native) {
     padding: 0;
   }
+}
 
-  ion-row {
-    margin-bottom: 8px;
+ion-grid {
+  padding: 0;
+}
+
+ion-row {
+  margin-bottom: 8px;
+}
+
+ion-textarea {
+  min-height: 100px;
+}
+
+// Estilos para la grilla de detalles
+.detalles-grid {
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 8px;
+  overflow: hidden;
+
+  .header-row {
+    background: var(--ion-color-primary);
+    color: white;
+    font-weight: bold;
+    padding: 12px 8px;
+
+    ion-col {
+      display: flex;
+      align-items: center;
+    }
   }
 
-  ion-textarea {
-    min-height: 100px;
+  .data-row {
+    border-bottom: 1px solid var(--ion-color-light-shade);
+    padding: 8px;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    ion-col {
+      display: flex;
+      align-items: center;
+    }
+
+    ion-buttons {
+      display: flex;
+      gap: 8px;
+    }
+  }
+
+  .empty-row {
+    padding: 24px;
+    color: var(--ion-color-medium);
+    font-style: italic;
   }
 }
 
@@ -56,8 +104,18 @@ form {
   margin: 4px 0;
 }
 
+// Responsive adjustments
 @media (min-width: 768px) {
   ion-card {
     margin: 24px;
+  }
+
+  ion-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  ion-col {
+    padding: 8px;
   }
 }

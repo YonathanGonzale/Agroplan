@@ -1,79 +1,84 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const db = require('./db');
+const errorHandler = require('./middleware/error.middleware');
 const aplicacionesRouter = require('./routes/aplicaciones');
+const productosRouter = require('./routes/productos');
+const authRouter = require('./routes/auth');
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
+// Configuración de seguridad
+app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:4200', 'http://localhost:8100'],
+  origin: 'http://localhost:4200',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
-app.use(express.json());
 
-// Rutas de aplicaciones
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100 // límite de 100 requests por ventana por IP
+});
+app.use(limiter);
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Registrar rutas
+app.use('/api/auth', authRouter);
 app.use('/api/aplicaciones', aplicacionesRouter);
+app.use('/api/productos', productosRouter);
 
-// Obtener todos los proveedores
+// Error handling middleware
+app.use(errorHandler);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
+
+app.listen(port, () => {
+  console.log(`Servidor corriendo en el puerto ${port}`);
+  console.log(`Ambiente: ${process.env.NODE_ENV}`);
+});
+
+// Obtener todos los proveedores con paginación y búsqueda
 app.get('/api/proveedores', async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const { busqueda, page = 1, limit = 10 } = req.query;
         const offset = (page - 1) * limit;
-        const search = req.query.search || '';
-
+        
         let query = 'SELECT * FROM proveedores';
         let countQuery = 'SELECT COUNT(*) FROM proveedores';
-        let params = [];
+        const queryParams = [];
 
-        if (search) {
-          query += ` WHERE CAST(codigo AS TEXT) LIKE $1 OR 
-                    LOWER(descripcion) LIKE LOWER($1) OR 
-                    LOWER(correo) LIKE LOWER($1)`;
-          countQuery += ` WHERE CAST(codigo AS TEXT) LIKE $1 OR 
-                    LOWER(descripcion) LIKE LOWER($1) OR 
-                    LOWER(correo) LIKE LOWER($1)`;
-          params.push(`%${search}%`);
+        if (busqueda) {
+            query += ' WHERE descripcion ILIKE $1';
+            countQuery += ' WHERE descripcion ILIKE $1';
+            queryParams.push(`%${busqueda}%`);
         }
 
-        query += ' ORDER BY codigo DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
-        params.push(limit, offset);
+        query += ' ORDER BY codigo LIMIT $' + (queryParams.length + 1) + ' OFFSET $' + (queryParams.length + 2);
+        queryParams.push(limit, offset);
 
-        const [result, countResult] = await Promise.all([
-          db.query(query, params),
-          db.query(countQuery, search ? [params[0]] : [])
+        const [proveedores, totalCount] = await Promise.all([
+            db.query(query, queryParams),
+            db.query(countQuery, busqueda ? [queryParams[0]] : [])
         ]);
 
         res.json({
-          data: result.rows,
-          total: parseInt(countResult.rows[0].count),
-          pagination: {
-            page,
-            limit,
-            totalPages: Math.ceil(parseInt(countResult.rows[0].count) / limit)
-          }
+            items: proveedores.rows,
+            total: parseInt(totalCount.rows[0].count)
         });
-      } catch (err) {
-        console.error('Error en GET /api/proveedores:', err);
-        res.status(500).json({ error: err.message });
-      }
-});
-
-// Obtener un proveedor por CODIGO
-app.get('/api/proveedores/:codigo', async (req, res) => {
-    try {
-        const { codigo } = req.params;
-        const result = await db.query('SELECT * FROM proveedores WHERE codigo = $1', [codigo]);
-        
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Proveedor no encontrado' });
-        }
-        
-        res.json(result.rows[0]);
     } catch (err) {
-        console.error('Error en GET /api/proveedores/:codigo:', err);
+        console.error('Error en GET /api/proveedores:', err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -328,6 +333,40 @@ app.get('/api/aplicadores/:codigo', async (req, res) => {
     }
 });
 
+// Obtener todos los aplicadores con paginación y búsqueda
+app.get('/api/aplicadores', async (req, res) => {
+    try {
+        const { busqueda, page = 1, limit = 10 } = req.query;
+        const offset = (page - 1) * limit;
+        
+        let query = 'SELECT * FROM aplicadores';
+        let countQuery = 'SELECT COUNT(*) FROM aplicadores';
+        const queryParams = [];
+
+        if (busqueda) {
+            query += ' WHERE descripcion ILIKE $1';
+            countQuery += ' WHERE descripcion ILIKE $1';
+            queryParams.push(`%${busqueda}%`);
+        }
+
+        query += ' ORDER BY codigo LIMIT $' + (queryParams.length + 1) + ' OFFSET $' + (queryParams.length + 2);
+        queryParams.push(limit, offset);
+
+        const [aplicadores, totalCount] = await Promise.all([
+            db.query(query, queryParams),
+            db.query(countQuery, busqueda ? [queryParams[0]] : [])
+        ]);
+
+        res.json({
+            items: aplicadores.rows,
+            total: parseInt(totalCount.rows[0].count)
+        });
+    } catch (err) {
+        console.error('Error en GET /api/aplicadores:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post('/api/aplicadores', async (req, res) => {
     try {
         const { descripcion, correo, telefono, direccion } = req.body;
@@ -380,6 +419,4 @@ app.delete('/api/aplicadores/:codigo', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}`);
-});
+// El servidor ya está iniciado arriba

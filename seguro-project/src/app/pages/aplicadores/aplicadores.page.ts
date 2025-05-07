@@ -72,7 +72,7 @@ export class AplicadoresPage implements OnInit {
   async confirmDelete(aplicador: Aplicador) {
     const alert = await this.alertController.create({
       header: 'Confirmar eliminación',
-      message: `¿Está seguro que desea eliminar el aplicador ${aplicador.descripcion}?`,
+      message: `¿Está seguro que desea eliminar el aplicador ${aplicador.productor}?`,
       buttons: [
         {
           text: 'Cancelar',

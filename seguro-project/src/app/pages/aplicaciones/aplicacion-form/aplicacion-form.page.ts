@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LoadingController, ToastController } from '@ionic/angular';
-import { AplicacionesService } from '../../../services/aplicaciones.service';
+import { LoadingController, ModalController, ToastController } from '@ionic/angular';
+import { Aplicacion } from '../../../interfaces/aplicacion.interface';
+import { AplicacionDetalle } from '../../../interfaces/aplicacion-detalle';
+import { DetalleFormComponent } from '../detalle-form/detalle-form.component';
 
 @Component({
   selector: 'app-aplicacion-form',
@@ -10,123 +12,164 @@ import { AplicacionesService } from '../../../services/aplicaciones.service';
   styleUrls: ['./aplicacion-form.page.scss'],
 })
 export class AplicacionFormPage implements OnInit {
-  aplicacionForm!: FormGroup;
+  aplicacionForm: FormGroup;
   isEdit = false;
-  registro = 0;
+  aplicacionId?: number;
+
+  get detallesFormArray() {
+    return this.aplicacionForm.get('detalles') as FormArray;
+  }
 
   constructor(
     private fb: FormBuilder,
-    private aplicacionesService: AplicacionesService,
     private route: ActivatedRoute,
     private router: Router,
     private loadingController: LoadingController,
+    private modalController: ModalController,
     private toastController: ToastController
   ) {
-    this.aplicacionForm = this.createForm();
+    this.aplicacionForm = this.fb.group({
+      fecha: ['', Validators.required],
+      parcela_id: ['', Validators.required],
+      observaciones: [''],
+      detalles: this.fb.array([])
+    });
   }
 
   ngOnInit() {
-    const registroParam = this.route.snapshot.paramMap.get('registro');
-    if (registroParam) {
-      this.isEdit = true;
-      this.registro = +registroParam;
-      this.loadAplicacion();
-    }
-  }
-
-  private createForm(): FormGroup {
-    return this.fb.group({
-      fecha: ['', Validators.required],
-      cultivo: ['', Validators.required],
-      area: ['', [Validators.required, Validators.min(0)]],
-      producto: ['', Validators.required],
-      descripcion: [''],
-      ingrediente_activo: ['', Validators.required],
-      dosis: ['', Validators.required],
-      objetivo: ['', Validators.required],
-      aplicador: ['', Validators.required],
-      epi_usado: [true],
-      tipo_pico: ['Conico', Validators.required],
-      vol_agua: ['', [Validators.required, Validators.min(0)]],
-      temperatura: ['', [Validators.required, Validators.min(-50), Validators.max(60)]],
-      humedad: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
-      velocidad_viento: ['', [Validators.required, Validators.min(0)]],
-      departamento: ['', Validators.required],
-      distrito: ['', Validators.required],
-      localidad: ['', Validators.required],
-      parcela_nro: ['', Validators.required],
-      productor: ['', Validators.required],
-      matricula_profesional: ['354'],
-      registro_senave: ['2'],
-      entidad_comercializadora: [''],
-      reg_producto: [''],
-      receta_nro: [''],
-      fecha_exp: ['']
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.isEdit = true;
+        this.aplicacionId = +params['id'];
+        this.cargarAplicacion();
+      }
     });
   }
 
-  private async loadAplicacion() {
+  async cargarAplicacion() {
     const loading = await this.loadingController.create({
-      message: 'Cargando...'
+      message: 'Cargando aplicación...'
     });
     await loading.present();
 
-    this.aplicacionesService.getAplicacion(this.registro).subscribe(
-      (aplicacion) => {
-        this.aplicacionForm.patchValue({
-          ...aplicacion,
-          fecha: aplicacion.fecha.split('T')[0]
-        });
-        loading.dismiss();
-      },
-      error => {
-        console.error('Error al cargar aplicación:', error);
-        loading.dismiss();
-        this.showToast('Error al cargar los datos de la aplicación', 'danger');
-      }
-    );
-  }
+    try {
+      // TODO: Implementar servicio para cargar aplicación
+      const aplicacion: Aplicacion = {
+        fecha: new Date(),
+        parcela_id: 1,
+        observaciones: '',
+        detalles: []
+      };
 
-  async onSubmit() {
-    if (this.aplicacionForm.valid) {
-      const loading = await this.loadingController.create({
-        message: 'Guardando...'
+      // Actualizar campos básicos
+      this.aplicacionForm.patchValue({
+        fecha: aplicacion.fecha,
+        parcela_id: aplicacion.parcela_id,
+        observaciones: aplicacion.observaciones
       });
-      await loading.present();
 
-      const aplicacion = this.aplicacionForm.value;
+      // Limpiar detalles existentes
+      while (this.detallesFormArray.length !== 0) {
+        this.detallesFormArray.removeAt(0);
+      }
 
-      const request = this.isEdit
-        ? this.aplicacionesService.updateAplicacion(this.registro, aplicacion)
-        : this.aplicacionesService.createAplicacion(aplicacion);
+      // Agregar nuevos detalles
+      aplicacion.detalles?.forEach(detalle => {
+        const detalleForm = this.fb.group({
+          cultivo: [detalle.cultivo || '', Validators.required],
+          nombre_comercial: [detalle.nombre_comercial || '', Validators.required],
+          area: [detalle.area || 0, [Validators.required, Validators.min(0)]]
+        });
+        this.detallesFormArray.push(detalleForm);
+      });
 
-      request.subscribe(
-        () => {
-          loading.dismiss();
-          this.showToast(
-            this.isEdit ? 'Aplicación actualizada correctamente' : 'Aplicación creada correctamente',
-            'success'
-          );
-          this.router.navigate(['/aplicaciones']);
-        },
-        error => {
-          console.error('Error al guardar aplicación:', error);
-          loading.dismiss();
-          this.showToast('Error al guardar la aplicación', 'danger');
-        }
-      );
-    } else {
-      this.showToast('Por favor, complete todos los campos requeridos', 'warning');
+    } catch (error) {
+      console.error('Error al cargar la aplicación:', error);
+      const toast = await this.toastController.create({
+        message: 'Error al cargar la aplicación',
+        duration: 2000,
+        color: 'danger'
+      });
+      await toast.present();
+    } finally {
+      await loading.dismiss();
     }
   }
 
-  private async showToast(message: string, color: string) {
-    const toast = await this.toastController.create({
-      message,
-      duration: 2000,
-      color,
-      position: 'bottom'
+  async guardarAplicacion() {
+    if (this.aplicacionForm.valid) {
+      const loading = await this.loadingController.create({
+        message: 'Guardando aplicación...'
+      });
+      await loading.present();
+
+      try {
+        const aplicacionData = this.aplicacionForm.value;
+        // TODO: Implementar servicio para guardar aplicación
+        console.log('Datos a guardar:', aplicacionData);
+
+        await loading.dismiss();
+        await this.router.navigate(['/aplicaciones']);
+
+      } catch (error) {
+        console.error('Error al guardar la aplicación:', error);
+        const toast = await this.toastController.create({
+          message: 'Error al guardar la aplicación',
+          duration: 2000,
+          color: 'danger'
+        });
+        await toast.present();
+      }
+    } else {
+      const toast = await this.toastController.create({
+        message: 'Por favor, complete todos los campos requeridos',
+        duration: 2000,
+        color: 'warning'
+      });
+      await toast.present();
+    }
+  }
+
+  async agregarDetalle() {
+    const modal = await this.modalController.create({
+      component: DetalleFormComponent
     });
-    toast.present();
+
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data) {
+      const detalleForm = this.fb.group({
+        cultivo: [data.cultivo || '', Validators.required],
+        nombre_comercial: [data.nombre_comercial || '', Validators.required],
+        area: [data.area || 0, [Validators.required, Validators.min(0)]]
+      });
+      this.detallesFormArray.push(detalleForm);
+    }
+  }
+
+  async editarDetalle(index: number) {
+    const detalleActual = this.detallesFormArray.at(index).value;
+    const modal = await this.modalController.create({
+      component: DetalleFormComponent,
+      componentProps: {
+        detalle: { ...detalleActual }
+      }
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+    if (data) {
+      this.detallesFormArray.at(index).patchValue({
+        cultivo: data.cultivo,
+        nombre_comercial: data.nombre_comercial,
+        area: data.area
+      });
+    }
+  }
+
+  eliminarDetalle(index: number) {
+    this.detallesFormArray.removeAt(index);
   }
 }

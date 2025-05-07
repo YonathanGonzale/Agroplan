@@ -28,11 +28,12 @@
     <ion-item-sliding *ngFor="let aplicador of aplicadores">
       <ion-item>
         <ion-label>
-          <h2>{{ aplicador.descripcion }}</h2>
+          <h2>{{ aplicador.productor }}</h2>
           <p>Código: {{ aplicador.codigo }}</p>
           <p>Correo: {{ aplicador.correo }}</p>
           <p>Teléfono: {{ aplicador.telefono }}</p>
           <p>Dirección: {{ aplicador.direccion }}</p>
+          <p>Aplicadores: {{ aplicador.aplicadores }}</p>
         </ion-label>
       </ion-item>
 

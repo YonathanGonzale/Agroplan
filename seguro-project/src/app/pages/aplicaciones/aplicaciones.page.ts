@@ -11,7 +11,8 @@ import { Aplicacion } from '../../interfaces/aplicacion.interface';
 export class AplicacionesPage implements OnInit {
   aplicaciones: Aplicacion[] = [];
   currentPage = 1;
-  itemsPerPage = 10;
+  pageSize = 10;
+  totalItems = 0;
   totalPages = 0;
   searchTerm = '';
 
@@ -31,14 +32,16 @@ export class AplicacionesPage implements OnInit {
     });
     await loading.present();
 
-    this.aplicacionesService.getAplicaciones(this.currentPage, this.itemsPerPage, this.searchTerm).subscribe(
+    this.aplicacionesService.getAplicaciones(this.currentPage).subscribe(
       (response: any) => {
-        this.aplicaciones = response.data;
-        this.totalPages = Math.ceil(response.total / this.itemsPerPage);
+        const items = response.items || [];
+        this.aplicaciones = items;
+        this.totalItems = response.total;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
         loading.dismiss();
         if (event) event.target.complete();
       },
-      error => {
+      (error) => {
         console.error('Error al cargar aplicaciones:', error);
         loading.dismiss();
         if (event) event.target.complete();
@@ -91,6 +94,27 @@ export class AplicacionesPage implements OnInit {
     );
   }
 
+
+
+  loadMore(event: any) {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.aplicacionesService.getAplicaciones(this.currentPage).subscribe(
+        (response: any) => {
+          const items = response.items || [];
+          this.aplicaciones = [...this.aplicaciones, ...items];
+          event.target.complete();
+        },
+        (error) => {
+          console.error('Error al cargar más aplicaciones:', error);
+          event.target.complete();
+        }
+      );
+    } else {
+      event.target.complete();
+    }
+  }
+
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
@@ -104,6 +128,8 @@ export class AplicacionesPage implements OnInit {
       this.loadAplicaciones();
     }
   }
+
+
 
   async exportToExcel(registro?: number | undefined) {
     const loading = await this.loadingController.create({

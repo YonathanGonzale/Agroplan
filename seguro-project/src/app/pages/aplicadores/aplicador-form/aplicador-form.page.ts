@@ -24,10 +24,11 @@ export class AplicadorFormPage implements OnInit {
     private toastController: ToastController
   ) {
     this.aplicadorForm = this.fb.group({
-      descripcion: ['', [Validators.required]],
-      correo: ['', [Validators.email]],
+      productor: ['', Validators.required],
+      correo: [''],
       telefono: [''],
-      direccion: ['']
+      direccion: [''],
+      aplicadores: [''],
     });
   }
 

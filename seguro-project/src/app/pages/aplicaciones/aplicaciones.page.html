@@ -27,17 +27,20 @@
     </ion-fab-button>
   </ion-fab>
 
-  <ion-list>
+  <ion-list *ngIf="aplicaciones && aplicaciones.length > 0; else noAplicaciones">
     <ion-item-sliding *ngFor="let aplicacion of aplicaciones">
       <ion-item>
         <ion-label>
-          <h2>{{ aplicacion.cultivo }}</h2>
+          <h2>{{ aplicacion.observaciones || 'Sin observaciones' }}</h2>
           <h3>{{ aplicacion.fecha | date:'dd/MM/yyyy' }}</h3>
           <p>
-            <ion-text color="medium">Producto:</ion-text> {{ aplicacion.producto }}
+            <ion-text color="medium">Parcela:</ion-text> {{ aplicacion.parcela_id }}
           </p>
           <p>
-            <ion-text color="medium">Aplicador:</ion-text> {{ aplicacion.aplicador }}
+            <ion-text color="medium">Productos:</ion-text> {{ aplicacion.detalles?.length || 0 }}
+          </p>
+          <p>
+            <ion-text color="medium">Productor:</ion-text> {{ aplicacion.productor }}
           </p>
         </ion-label>
       </ion-item>
@@ -63,15 +66,18 @@
     </ion-item-sliding>
   </ion-list>
 
-  <ion-grid *ngIf="aplicaciones.length === 0">
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <ion-text color="medium">
-          No hay aplicaciones registradas
-        </ion-text>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <ng-template #noAplicaciones>
+    <div class="ion-text-center ion-padding">
+      <ion-text color="medium">No hay aplicaciones registradas</ion-text>
+    </div>
+  </ng-template>
+
+  <ion-infinite-scroll (ionInfinite)="loadMore($event)" [disabled]="currentPage >= totalPages">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Cargando más aplicaciones...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 
   <ion-grid>
     <ion-row>

@@ -13,24 +13,24 @@ router.get('/', async (req, res) => {
 
         let query = `
             SELECT 
-                "REGISTRO" as registro,
-                "FECHA" as fecha,
-                "CULTIVO" as cultivo,
-                "AREA" as area,
-                "PRODUTO" as producto,
-                "DESCRICAO" as descripcion,
-                "INGREDIENTE_ACTIVO" as ingrediente_activo,
-                "DOSIS" as dosis,
-                "OBJETIVO" as objetivo,
-                "APLICADOR" as aplicador,
-                "EPI" as epi_usado,
-                "TIPO_PICO" as tipo_pico,
-                "VOL_AGUA" as vol_agua,
-                "TEMPERATURA" as temperatura,
-                "HUMEDAD" as humedad,
-                "VIENTO" as velocidad_viento,
-                "RECETA_NRO" as receta_nro,
-                "FECHA_EXP" as fecha_exp
+                "REGISTRO",
+                "FECHA",
+                "CULTIVO",
+                "AREA",
+                "PRODUTO",
+                "DESCRICAO",
+                "INGREDIENTE_ACTIVO",
+                "DOSIS",
+                "OBJETIVO",
+                "APLICADOR",
+                "EPI",
+                "TIPO_PICO",
+                "VOL_AGUA",
+                "TEMPERATURA",
+                "HUMEDAD",
+                "VIENTO",
+                "RECETA_NRO",
+                "FECHA_EXP"
             FROM aplicaciones`;
         let countQuery = 'SELECT COUNT(*) FROM aplicaciones';
         let params = [];
@@ -58,13 +58,8 @@ router.get('/', async (req, res) => {
         ]);
 
         res.json({
-            data: result.rows,
-            total: parseInt(countResult.rows[0].count),
-            pagination: {
-                page,
-                limit,
-                totalPages: Math.ceil(parseInt(countResult.rows[0].count) / limit)
-            }
+            items: result.rows,
+            total: parseInt(countResult.rows[0].count)
         });
     } catch (err) {
         console.error('Error en GET /api/aplicaciones:', err);
@@ -522,6 +517,121 @@ router.get('/export/excel', async (req, res) => {
     } catch (error) {
         console.error('Error al exportar las aplicaciones:', error);
         res.status(500).json({ message: 'Error al exportar las aplicaciones' });
+    }
+});
+
+// Actualizar un detalle de aplicación
+router.put('/:registro/detalles/:detalleId', async (req, res) => {
+    try {
+        const { registro, detalleId } = req.params;
+        const {
+            CULTIVO,
+            AREA,
+            NOMBRE_COMERCIAL,
+            INGREDIENTE_ACTIVO,
+            DOSIS,
+            OBJETIVO,
+            NOMBRE_APLICADOR,
+            EPI_USADO,
+            TIPO_PICO,
+            VOL_AGUA,
+            TEMPERATURA,
+            HUMEDAD,
+            VELOCIDAD_VIENTO
+        } = req.body;
+
+        console.log('Actualizando detalle:', {
+            registro,
+            detalleId,
+            body: req.body
+        });
+
+        const query = `
+            UPDATE aplicaciones_detalles SET
+                "CULTIVO" = $1,
+                "AREA" = $2,
+                "NOMBRE_COMERCIAL" = $3,
+                "INGREDIENTE_ACTIVO" = $4,
+                "DOSIS" = $5,
+                "OBJETIVO_APLICACION" = $6,
+                "NOMBRE_APLICADOR" = $7,
+                "EPI_USADO" = $8,
+                "TIPO_PICO" = $9,
+                "VOL_AGUA" = $10,
+                "TEMPERATURA" = $11,
+                "HUMEDAD" = $12,
+                "VELOCIDAD_VIENTO" = $13
+            WHERE "ID" = $14 AND "APLICACION_ID" = $15
+            RETURNING *`;
+
+        const values = [
+            CULTIVO,
+            AREA,
+            NOMBRE_COMERCIAL,
+            INGREDIENTE_ACTIVO,
+            DOSIS,
+            OBJETIVO,
+            NOMBRE_APLICADOR,
+            EPI_USADO,
+            TIPO_PICO,
+            VOL_AGUA,
+            TEMPERATURA,
+            HUMEDAD,
+            VELOCIDAD_VIENTO,
+            detalleId,
+            registro
+        ];
+
+        const result = await db.query(query, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Detalle no encontrado' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error al actualizar detalle:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Obtener los detalles de una aplicación
+router.get('/:registro/detalles', async (req, res) => {
+    try {
+        const { registro } = req.params;
+        console.log('Buscando detalles para aplicación:', registro);
+        
+        const query = `
+            SELECT 
+                "REGISTRO",
+                "APLICACION_ID",
+                "CULTIVO",
+                "AREA",
+                "NOMBRE_COMERCIAL",
+                "INGREDIENTE_ACTIVO",
+                "DOSIS",
+                "OBJETIVO_APLICACION",
+                "NOMBRE_APLICADOR",
+                "EPI_USADO",
+                "TIPO_PICO",
+                "VOL_AGUA",
+                "TEMPERATURA",
+                "HUMEDAD",
+                "VELOCIDAD_VIENTO"
+            FROM aplicaciones_detalles
+            WHERE "APLICACION_ID" = $1
+            ORDER BY "REGISTRO";
+        `;
+        
+        console.log('Query:', query);
+        console.log('Params:', [registro]);
+        const result = await db.query(query, [registro]);
+        console.log('Resultado:', result.rows);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error al obtener detalles de aplicación:', error);
+        console.error('Stack:', error.stack);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
 

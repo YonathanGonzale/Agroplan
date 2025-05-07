@@ -24,7 +24,7 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <ion-list>
+  <ion-list *ngIf="proveedores && proveedores.length > 0; else noProveedores">
     <ion-item-sliding *ngFor="let proveedor of proveedores">
       <ion-item>
         <ion-label>
@@ -55,6 +55,12 @@
     <ion-text color="medium">Desliza hacia abajo para ver más proveedores</ion-text>
     <ion-icon name="chevron-down" color="medium"></ion-icon>
   </div>
+
+  <ng-template #noProveedores>
+    <div class="ion-text-center ion-padding">
+      <ion-text color="medium">No hay proveedores disponibles</ion-text>
+    </div>
+  </ng-template>
 
   <ion-infinite-scroll (ionInfinite)="loadMore($event)" [disabled]="currentPage >= totalPages">
     <ion-infinite-scroll-content

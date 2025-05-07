@@ -1,0 +1,156 @@
+<div class="ion-padding">
+  <!-- Lista de Detalles Existentes -->
+  <ion-card *ngIf="detalles.length > 0" class="detalles-list-card">
+    <ion-card-header>
+      <ion-card-title>Productos Aplicados</ion-card-title>
+      <ion-card-subtitle>Lista de productos y sus detalles</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item-sliding *ngFor="let detalle of detalles">
+          <ion-item>
+            <ion-thumbnail slot="start" class="product-icon">
+              <ion-icon name="flask-outline" size="large"></ion-icon>
+            </ion-thumbnail>
+            <ion-label>
+              <h2><strong>{{ detalle.nombre_comercial }}</strong></h2>
+              <p><ion-icon name="leaf-outline"></ion-icon> Cultivo: {{ detalle.cultivo }}</p>
+              <p><ion-icon name="resize-outline"></ion-icon> Área: {{ detalle.area }} Ha</p>
+              <p><ion-icon name="flask-outline"></ion-icon> Dosis: {{ detalle.dosis }}</p>
+              <p><ion-icon name="person-outline"></ion-icon> Aplicador: {{ detalle.nombre_aplicador }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item-options side="end">
+            <ion-item-option color="danger" (click)="detalle.registro && onDeleteDetalle(detalle.registro)">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Formulario de Nuevo Detalle -->
+  <ion-card class="nuevo-detalle-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="add-circle-outline"></ion-icon>
+        Agregar Nuevo Producto
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="detalleForm" (ngSubmit)="onSubmit()">
+        <ion-grid>
+          <!-- Información Básica -->
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Cultivo</ion-label>
+                <ion-input type="text" formControlName="cultivo"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Área (Ha)</ion-label>
+                <ion-input type="number" formControlName="area"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <!-- Información del Producto -->
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Nombre Comercial</ion-label>
+                <ion-input type="text" formControlName="producto"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Ingrediente Activo</ion-label>
+                <ion-input type="text" formControlName="ingrediente_activo"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <!-- Detalles de Aplicación -->
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Dosis</ion-label>
+                <ion-input type="number" formControlName="dosis"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Objetivo de Aplicación</ion-label>
+                <ion-input type="text" formControlName="objetivo"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <!-- Información del Aplicador -->
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Nombre del Aplicador</ion-label>
+                <ion-input type="text" formControlName="aplicador"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item lines="none">
+                <ion-label>EPI Usado</ion-label>
+                <ion-toggle formControlName="epi_usado"></ion-toggle>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <!-- Detalles Técnicos -->
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Tipo de Pico</ion-label>
+                <ion-input type="text" formControlName="tipo_pico"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Volumen de Agua</ion-label>
+                <ion-input type="number" formControlName="vol_agua"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <!-- Condiciones Ambientales -->
+          <ion-row>
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-label position="floating">Temperatura (°C)</ion-label>
+                <ion-input type="number" formControlName="temperatura"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-label position="floating">Humedad (%)</ion-label>
+                <ion-input type="number" formControlName="humedad"></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="4">
+              <ion-item>
+                <ion-label position="floating">Velocidad del Viento (km/h)</ion-label>
+                <ion-input type="number" formControlName="velocidad_viento"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <div class="ion-padding-top">
+          <ion-button expand="block" type="submit" [disabled]="!detalleForm.valid">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Agregar Producto
+          </ion-button>
+        </div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</div>

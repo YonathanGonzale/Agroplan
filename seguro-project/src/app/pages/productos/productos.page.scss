@@ -1,0 +1,15 @@
+// Styles for productos page
+ion-content {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+}
+
+ion-list {
+  background: transparent;
+}
+
+ion-item {
+  margin-bottom: 8px;
+  --border-radius: 8px;
+}

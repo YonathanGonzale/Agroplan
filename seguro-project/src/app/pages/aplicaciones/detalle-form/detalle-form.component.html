@@ -1,0 +1,88 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ detalle ? 'Editar' : 'Nuevo' }} Detalle</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="detalleForm" (ngSubmit)="guardar()">
+    <ion-item>
+      <ion-label position="floating">Cultivo</ion-label>
+      <ion-input type="text" formControlName="cultivo"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Área (ha)</ion-label>
+      <ion-input type="number" formControlName="area"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Nombre Comercial</ion-label>
+      <ion-input type="text" formControlName="nombre_comercial"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Ingrediente Activo</ion-label>
+      <ion-input type="text" formControlName="ingrediente_activo"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Dosis (l/ha)</ion-label>
+      <ion-input type="number" formControlName="dosis"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Objetivo de Aplicación</ion-label>
+      <ion-input type="text" formControlName="objetivo_aplicacion"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Nombre del Aplicador</ion-label>
+      <ion-input type="text" formControlName="nombre_aplicador"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>EPI Usado</ion-label>
+      <ion-toggle formControlName="epi_usado"></ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Tipo de Pico</ion-label>
+      <ion-input type="text" formControlName="tipo_pico"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Volumen de Agua (l/ha)</ion-label>
+      <ion-input type="number" formControlName="vol_agua"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Temperatura (°C)</ion-label>
+      <ion-input type="number" formControlName="temperatura"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Humedad (%)</ion-label>
+      <ion-input type="number" formControlName="humedad"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Velocidad del Viento (km/h)</ion-label>
+      <ion-input type="number" formControlName="velocidad_viento"></ion-input>
+    </ion-item>
+
+    <div class="ion-padding">
+      <ion-button expand="block" type="submit" [disabled]="!detalleForm.valid">
+        {{ detalle ? 'Actualizar' : 'Agregar' }}
+      </ion-button>
+      <ion-button expand="block" color="medium" (click)="cancelar()" class="ion-margin-top">
+        Cancelar
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

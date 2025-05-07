@@ -1,241 +1,80 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/aplicaciones"></ion-back-button>
     </ion-buttons>
     <ion-title>{{ isEdit ? 'Editar' : 'Nueva' }} Aplicación</ion-title>
   </ion-toolbar>
-  <ion-toolbar>
-    <ion-text color="medium">
-      <p class="ion-padding-horizontal">
-        Matrícula Profesional N°: {{ aplicacionForm.get('matricula_profesional')?.value }} |
-        Registro SENAVE N°: {{ aplicacionForm.get('registro_senave')?.value }}
-      </p>
-    </ion-text>
-  </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <form [formGroup]="aplicacionForm" (ngSubmit)="onSubmit()">
-    <!-- Sección de Ubicación -->
+  <form [formGroup]="aplicacionForm" (ngSubmit)="guardarAplicacion()">
+    <!-- Información Básica -->
     <ion-card>
       <ion-card-header>
-        <ion-card-title>Ubicación</ion-card-title>
+        <ion-card-title>Información Básica</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12">
-              <ion-item>
-                <ion-label position="stacked">Productor <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="productor" placeholder="Ingrese el nombre del productor"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Departamento <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="departamento" placeholder="Ingrese el departamento"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Distrito <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="distrito" placeholder="Ingrese el distrito"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Localidad <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="localidad" placeholder="Ingrese la localidad"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Parcela N° <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="parcela_nro" placeholder="Ingrese el número de parcela"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+        <ion-item>
+          <ion-label position="floating">Fecha</ion-label>
+          <ion-datetime formControlName="fecha" displayFormat="DD/MM/YYYY"></ion-datetime>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Parcela ID</ion-label>
+          <ion-input type="number" formControlName="parcela_id"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="floating">Observaciones</ion-label>
+          <ion-textarea formControlName="observaciones" rows="3"></ion-textarea>
+        </ion-item>
       </ion-card-content>
     </ion-card>
 
-    <!-- Sección de Aplicación -->
+    <!-- Detalles de Aplicación -->
     <ion-card>
       <ion-card-header>
         <ion-card-title>Detalles de la Aplicación</ion-card-title>
+        <ion-button fill="clear" (click)="agregarDetalle()">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Agregar Detalle
+        </ion-button>
       </ion-card-header>
       <ion-card-content>
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Fecha <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="date" formControlName="fecha"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Cultivo <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="cultivo" placeholder="Ingrese el cultivo"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Área (Ha) <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="number" formControlName="area" placeholder="Ingrese el área"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Aplicador <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="aplicador" placeholder="Ingrese el nombre del aplicador"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+        <ion-list formArrayName="detalles">
+          <ion-item-sliding *ngFor="let detalle of detallesFormArray.controls; let i = index" [formGroupName]="i">
+            <ion-item>
+              <ion-label>
+                <h2>{{ detalle.get('cultivo')?.value || 'Nuevo detalle' }}</h2>
+                <p>Producto: {{ detalle.get('nombre_comercial')?.value }}</p>
+                <p>Área: {{ detalle.get('area')?.value }} ha</p>
+              </ion-label>
+              <ion-button slot="end" fill="clear" (click)="editarDetalle(i)">
+                <ion-icon name="create-outline"></ion-icon>
+              </ion-button>
+            </ion-item>
+            <ion-item-options side="end">
+              <ion-item-option color="danger" (click)="eliminarDetalle(i)">
+                <ion-icon name="trash-outline"></ion-icon>
+                Eliminar
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+
+          <ion-item *ngIf="detallesFormArray.length === 0" lines="none">
+            <ion-label class="ion-text-center">
+              No hay detalles agregados
+            </ion-label>
+          </ion-item>
+        </ion-list>
       </ion-card-content>
     </ion-card>
 
-    <!-- Sección de Producto -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Información del Producto</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Nombre Comercial <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="producto" placeholder="Ingrese el nombre comercial"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Reg. Producto N°</ion-label>
-                <ion-input type="text" formControlName="reg_producto" placeholder="Ingrese el número de registro del producto"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Receta Agronómica N°</ion-label>
-                <ion-input type="text" formControlName="receta_nro" placeholder="Ingrese el número de receta agronómica"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Fecha Expedición</ion-label>
-                <ion-input type="date" formControlName="fecha_exp"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12">
-              <ion-item>
-                <ion-label position="stacked">Descripción</ion-label>
-                <ion-textarea formControlName="descripcion" placeholder="Ingrese una descripción"></ion-textarea>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Ingrediente Activo % <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="ingrediente_activo" placeholder="Ingrese el ingrediente activo"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Dosis (l/Ha) <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="text" formControlName="dosis" placeholder="Ingrese la dosis"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12">
-              <ion-item>
-                <ion-label position="stacked">Objetivo <ion-text color="danger">*</ion-text></ion-label>
-                <ion-textarea formControlName="objetivo" placeholder="Ingrese el objetivo"></ion-textarea>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Sección de Condiciones -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Condiciones de Aplicación</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Tipo de Pico <ion-text color="danger">*</ion-text></ion-label>
-                <ion-select formControlName="tipo_pico" placeholder="Seleccione el tipo de pico" interface="action-sheet">
-                  <ion-select-option value="Conico">Cónico</ion-select-option>
-                  <ion-select-option value="Abanico">Abanico</ion-select-option>
-                  <ion-select-option value="Abanico Doble">Abanico Doble</ion-select-option>
-                </ion-select>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Vol. de Agua (l/ha) <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="number" formControlName="vol_agua" placeholder="Ingrese el volumen de agua"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12" size-md="4">
-              <ion-item>
-                <ion-label position="stacked">Temperatura (°C) <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="number" formControlName="temperatura" placeholder="Ingrese la temperatura"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="4">
-              <ion-item>
-                <ion-label position="stacked">Humedad (%) <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="number" formControlName="humedad" placeholder="Ingrese la humedad"></ion-input>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="4">
-              <ion-item>
-                <ion-label position="stacked">Velocidad del Viento (km/h) <ion-text color="danger">*</ion-text></ion-label>
-                <ion-input type="number" formControlName="velocidad_viento" placeholder="Ingrese la velocidad"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label>E.P.I. Usado</ion-label>
-                <ion-toggle formControlName="epi_usado"></ion-toggle>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item>
-                <ion-label position="stacked">Entidad Comercializadora</ion-label>
-                <ion-input type="text" formControlName="entidad_comercializadora" placeholder="Ingrese la entidad"></ion-input>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-card-content>
-    </ion-card>
-
-    <div class="ion-padding ion-margin-top">
-      <ion-button expand="block" type="submit" [disabled]="!aplicacionForm.valid">
-        {{ isEdit ? 'Actualizar' : 'Crear' }} Aplicación
+    <!-- Botones de Acción -->
+    <div class="ion-padding-top">
+      <ion-button expand="block" type="submit" [disabled]="!aplicacionForm.valid || detallesFormArray.length === 0">
+        Guardar
       </ion-button>
     </div>
   </form>

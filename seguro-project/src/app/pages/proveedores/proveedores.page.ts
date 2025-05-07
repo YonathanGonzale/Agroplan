@@ -36,10 +36,11 @@ export class ProveedoresPage implements OnInit {
           event.target.complete();
         }
         
+        const items = response.items || [];
         if (this.currentPage === 1) {
-          this.proveedores = response.data;
+          this.proveedores = items;
         } else {
-          this.proveedores = [...this.proveedores, ...response.data];
+          this.proveedores = [...this.proveedores, ...items];
         }
         
         this.totalPages = Math.ceil(response.total / this.itemsPerPage);

@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/productos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ isEdit ? 'Editar' : 'Nuevo' }} Producto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+    <ion-list>
+      <ion-item>
+        <ion-label position="stacked">Producto <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="text" formControlName="PRODUCTO" required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Descripción <ion-text color="danger">*</ion-text></ion-label>
+        <ion-textarea formControlName="DESCRIPCION" required></ion-textarea>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Ingrediente Activo <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input type="text" formControlName="INGREDIENTE_ACTI" required></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <div class="ion-padding">
+      <ion-button expand="block" type="submit" [disabled]="!productoForm.valid">
+        {{ isEdit ? 'Actualizar' : 'Crear' }} Producto
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

@@ -5,6 +5,8 @@ import { IonicModule } from '@ionic/angular';
 import { RouterModule, Routes } from '@angular/router';
 import { AplicacionesPage } from './aplicaciones.page';
 import { AplicacionFormPage } from './aplicacion-form/aplicacion-form.page';
+import { AplicacionDetallesComponent } from './aplicacion-detalles/aplicacion-detalles.component';
+import { DetalleFormComponent } from './detalle-form/detalle-form.component';
 
 const routes: Routes = [
   {
@@ -16,7 +18,7 @@ const routes: Routes = [
     component: AplicacionFormPage
   },
   {
-    path: 'editar/:registro',
+    path: 'editar/:id',
     component: AplicacionFormPage
   }
 ];
@@ -29,9 +31,6 @@ const routes: Routes = [
     IonicModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [
-    AplicacionesPage,
-    AplicacionFormPage
-  ]
+  declarations: [AplicacionesPage, AplicacionFormPage, AplicacionDetallesComponent, DetalleFormComponent]
 })
 export class AplicacionesPageModule {}

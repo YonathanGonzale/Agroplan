@@ -3,14 +3,15 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Sistema Agro</ion-title>
+    <ion-title>Agroplan</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <div class="ion-padding">
-    <h1>Módulos del Sistema</h1>
-  </div>
+<ion-content class="background-image">
+  <div class="overlay">
+    <div class="ion-padding">
+      <h1>Módulos de Agroplan</h1>
+    </div>
 
   <ion-grid class="module-grid">
     <ion-row>
@@ -49,6 +50,15 @@
           </ion-card-content>
         </ion-card>
       </ion-col>
+      <ion-col size="6" size-md="3">
+        <ion-card class="module-card" routerLink="/productos">
+          <ion-card-content class="ion-text-center">
+            <ion-icon name="leaf" color="success"></ion-icon>
+            <h2>Productos</h2>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
     </ion-row>
   </ion-grid>
+  </div>
 </ion-content>
